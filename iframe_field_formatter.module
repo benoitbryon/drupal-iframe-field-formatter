@@ -1,6 +1,61 @@
 <?php
 /**
  * @file
- * General hooks of ${module_id} module.
+ * General hooks of iframe_field_formatter module.
  */
 
+/**
+ * Expose Field API formatter types.
+ * Add "iframe" formatter to "link" field type.
+ *
+ * @implements hook_field_formatter_info
+ */
+function iframe_field_formatter_field_formatter_info() {
+  return array(
+    'link_iframe' => array(
+      'label' => t('iFrame'),
+      'field types' => array('link_field'),
+    ),
+  );
+}
+
+/**
+ * Build a renderable array for a field value.
+ *
+ * @implements hook_field_formatter_view
+ */
+function iframe_field_formatter_field_formatter_view($entity_type, $entity,
+                                                     $field, $instance,
+                                                     $langcode, $items,
+                                                     $display) {
+  $elements = array();
+  foreach ($items as $delta => $item) {
+    $elements[$delta] = array(
+      '#markup' => theme('iframe_field_formatter_'. $display['type'],
+                         array('element' => $item, 'field' => $instance)),
+    );
+  }
+  return $elements;
+}
+
+/**
+ * Register theme implementations.
+ * 
+ * @implements hook_theme
+ */
+function iframe_field_formatter_theme() {
+  return array(
+    // The theme function that our formatter uses:
+    'iframe_field_formatter_link_iframe' => array(
+      'variables' => array('element' => NULL),
+    ),
+  );
+}
+
+/**
+ * Theme method to format a link field as iframe.
+ */
+function theme_iframe_field_formatter_link_iframe($vars) {
+  $url = isset($vars['element']['url']) ? $vars['element']['url'] : "";
+  return '<iframe src="'. $url .'"></iframe>';
+}
